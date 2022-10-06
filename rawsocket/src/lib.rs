@@ -5,13 +5,27 @@
 
 use std::os::unix::prelude::{AsRawFd, RawFd};
 
+pub use bs_filter as filter;
+use bs_filter::SocketFilterProgram;
+use libc::sock_fprog;
 use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 use tokio::io::unix::AsyncFd;
-use tokio::process::Command;
-
-
 
 const BUFFER_SIZE: usize = 1024 * 5;
+
+/// Helper macro to execute a system call that returns an `io::Result`.
+/// from socket2
+macro_rules! syscall {
+    ($fn: ident ( $($arg: expr),* $(,)* ) ) => {{
+        #[allow(unused_unsafe)]
+        let res = unsafe { libc::$fn($($arg, )*) };
+        if res == -1 {
+            Err(std::io::Error::last_os_error())
+        } else {
+            Ok(res)
+        }
+    }};
+}
 
 fn interface_index_to_sock_addr(index: i32) -> SockAddr {
     let mut addr_storage: libc::sockaddr_storage = unsafe { std::mem::zeroed() };
@@ -86,13 +100,23 @@ impl RawCapture {
 
     pub async fn next(&self) -> Result<Packet, std::io::Error> {
         loop {
-            println!("here4");
             let mut guard = self.inner.readable().await?;
-            println!("here5");
             match guard.try_io(|inner| inner.get_ref().next()) {
                 Ok(result) => return result,
                 Err(_would_block) => continue,
             }
         }
+    }
+
+    pub fn set_filter(&self, filter: SocketFilterProgram) -> Result<(), std::io::Error> {
+        let filter: sock_fprog = filter.into();
+        syscall!(setsockopt(
+            self.inner.get_ref().inner.as_raw_fd(),
+            libc::SOL_SOCKET,
+            libc::SO_ATTACH_FILTER,
+            std::ptr::addr_of!(filter).cast(),
+            std::mem::size_of::<sock_fprog>() as libc::socklen_t
+        ))
+        .map(|_| ())
     }
 }
