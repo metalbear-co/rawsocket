@@ -12,7 +12,7 @@ use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 use tokio::io::unix::AsyncFd;
 
 const BUFFER_SIZE: usize = 1024 * 5;
-
+const PACKET_IGNORE_OUTGOING: libc::c_int = 23;
 /// Helper macro to execute a system call that returns an `io::Result`.
 /// from socket2
 macro_rules! syscall {
@@ -115,6 +115,20 @@ impl RawCapture {
             libc::SO_ATTACH_FILTER,
             std::ptr::addr_of!(filter).cast(),
             std::mem::size_of::<sock_fprog>() as libc::socklen_t
+        ))
+        .map(|_| ())
+    }
+
+    /// Sets the socket to ignore outgoing packets, that can cause issues when
+    /// capturing loopback
+    pub fn ignore_outgoing(&self) -> Result<(), std::io::Error> {
+        let value: libc::c_int = 1;
+        syscall!(setsockopt(
+            self.inner.get_ref().inner.as_raw_fd(),
+            libc::SOL_PACKET,
+            PACKET_IGNORE_OUTGOING,
+            std::ptr::addr_of!(value).cast(),
+            std::mem::size_of::<libc::c_int>() as libc::socklen_t
         ))
         .map(|_| ())
     }

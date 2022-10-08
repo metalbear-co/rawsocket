@@ -6,6 +6,7 @@ async fn main() {
     println!("{}", filter.to_dump());
     let capture = RawCapture::from_interface_name("lo").expect("capture creation failed");
     capture.set_filter(filter).expect("setting filter failed");
+    capture.ignore_outgoing().expect("fml");
     loop {
         let packet = capture.next().await.expect("packet failed");
         println!("packet {packet:?}");
