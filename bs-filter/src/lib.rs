@@ -6,7 +6,7 @@ pub(crate) mod filter;
 pub use cbpf::SocketFilterProgram;
 use thiserror::Error;
 
-pub use filter::build_tcp_port_filter;
+pub use filter::{build_drop_always, build_tcp_port_filter};
 
 #[derive(Error, Debug)]
 pub enum BsError {
