@@ -41,7 +41,10 @@ mod inner {
     pub const OFFSET_ETHER_SRC: u32 = 6;
     pub const OFFSET_ETHER_TYPE: u32 = 12;
     pub const SIZE_ETHER_HEADER: u32 = 14;
+    pub const SIZE_IPV4_HEADER: u32 = 20;
+    pub const SIZE_IPV6_HEADER: u32 = 40;
 
+    pub const OFFSET_IP4_FRAGMENT: u32 = 6;
     pub const OFFSET_IP4_TTL: u32 = 8;
     pub const OFFSET_IP4_PROTO: u32 = 9;
     pub const OFFSET_IP4_SRC: u32 = 12;
@@ -51,6 +54,9 @@ mod inner {
     pub const OFFSET_IP6_HOP_LIMIT: u32 = 7;
     pub const OFFSET_IP6_SRC: u32 = 8;
     pub const OFFSET_IP6_DST: u32 = 24;
+
+    pub const OFFSET_TCP_SRC_PORT: u32 = 0;
+    pub const OFFSET_TCP_DST_PORT: u32 = 2;
 
     pub const ETH_P_IP: u32 = 0x0800;
     pub const ETH_P_ARP: u32 = 0x0806;

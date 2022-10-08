@@ -1,6 +1,6 @@
 use crate::consts::{
     OFFSET_IP4_DST, OFFSET_IP4_PROTO, OFFSET_IP4_SRC, OFFSET_IP4_TTL, OFFSET_IP6_DST,
-    OFFSET_IP6_HOP_LIMIT, OFFSET_IP6_NEXT_HEADER, OFFSET_IP6_SRC, SIZE_ETHER_HEADER,
+    OFFSET_IP6_HOP_LIMIT, OFFSET_IP6_NEXT_HEADER, OFFSET_IP6_SRC, SIZE_ETHER_HEADER, OFFSET_TCP_DST_PORT, OFFSET_TCP_SRC_PORT, SIZE_IPV4_HEADER,
 };
 use crate::idiom::ethernet::{ether_type_ip4, ether_type_ip6};
 use crate::idiom::shift_offset_equals_u32;
@@ -79,8 +79,12 @@ pub fn ip6_next_header(proto: u8) -> Predicate {
 }
 
 use byteorder::{BigEndian, ReadBytesExt};
+use libc::IPPROTO_TCP;
 use std::io::Cursor;
 use std::mem::size_of;
+
+use super::ethernet::ether_type;
+use super::shift_offset_equals_u16;
 fn ip6_address_to_u32_array(ip: Ipv6Addr) -> [u32; 4] {
     let buf = &mut ip.octets();
     let mut bytes = Cursor::new(buf);
@@ -203,4 +207,24 @@ pub fn shift_ip_host(ip: IpAddr, shift: u32) -> Predicate {
 /// true iff `ip` is either IP source or destination
 pub fn ip_host(ip: IpAddr) -> Predicate {
     shift_ip_host(ip, SIZE_ETHER_HEADER)
+}
+
+
+pub fn shift_tcp_dst_port(port: u16, shift: u32) -> Predicate {
+    shift_offset_equals_u16(OFFSET_TCP_DST_PORT, port, shift)
+}
+
+pub fn shift_tcp_src_port(port: u16, shift: u32) -> Predicate {
+    shift_offset_equals_u16(OFFSET_TCP_SRC_PORT, port, shift)
+}
+
+pub fn shift_tcp_port(port: u16, shift: u32) -> Predicate {
+    shift_tcp_src_port(port, shift) | shift_tcp_dst_port(port, shift)
+}
+
+
+pub fn tcp_port(port: u16) -> Predicate {
+    (ether_type_ip4() &  ip4_proto(IPPROTO_TCP as _) & shift_tcp_port(port, SIZE_ETHER_HEADER + SIZE_IPV4_HEADER))
+    |
+    (ether_type_ip6() & ip6_next_header(IPPROTO_TCP as _) & shift_tcp_port(port, SIZE_ETHER_HEADER + SIZE_IPV4_HEADER))
 }

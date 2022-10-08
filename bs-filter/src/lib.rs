@@ -8,7 +8,7 @@ pub(crate) mod program;
 pub use cbpf::SocketFilterProgram;
 use thiserror::Error;
 
-pub use filter::Filter;
+pub use filter::{Filter, build_tcp_port_filter};
 pub use predicate::Predicate;
 
 /// Ready-made filtering packet idioms, ranging from low level (e.g. `offset_equals_*` idioms) to

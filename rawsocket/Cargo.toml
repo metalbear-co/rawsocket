@@ -12,3 +12,6 @@ socket2 = "0.4"
 ipnetwork = "0.20"
 nix = "0.25"
 bs-filter = { path = "../bs-filter" }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["full"] }
