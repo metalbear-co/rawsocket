@@ -59,7 +59,7 @@ pub fn build_tcp_port_filter(ports: &[u16]) -> SocketFilterProgram {
     // Load dst port into A
     instructions.extend(load_u16_at(SIZE_ETHER_HEADER + SIZE_IPV6_HEADER + OFFSET_TCP_DST_PORT));
     // Jump to port comparison check (having src port in M[0] and dst port in A)
-    instructions.extend(jump(Comparison::Always, 0, 0, 10));
+    instructions.extend(jump(Comparison::Always, 9, 0, 0));
     // If we got here, it's from ether type check, so A has the ether type loaded
     // Check if it's IPv4, if not, drop
     instructions.extend(jump(Comparison::Equal, ETH_P_IP, 0, 8 + ports.len() + 1 + ports.len()));
