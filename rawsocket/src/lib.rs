@@ -44,8 +44,7 @@ pub struct RawSocket {
     inner: Socket,
 }
 
-#[derive(Debug)]
-pub struct Packet(Vec<u8>);
+pub type Packet = Vec<u8>;
 
 impl AsRawFd for RawSocket {
     fn as_raw_fd(&self) -> RawFd {
@@ -65,7 +64,7 @@ impl RawSocket {
             unsafe {
                 buf.set_len(len);
             }
-            Ok(Packet(buf))
+            Ok(buf)
         }
     }
 }
