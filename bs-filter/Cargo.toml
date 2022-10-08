@@ -1,0 +1,13 @@
+[package]
+name = "bs-filter"
+version = "0.1.0"
+authors = [
+    "Aviram Hassan <aviram@metalbear.co>",
+    "Oskar Matzerath <moskar.drummer@gmail.com>",
+]
+edition = "2021"
+
+
+[dependencies]
+libc = "0.2"
+thiserror = "1"
