@@ -1,5 +1,4 @@
-use bs_filter::SocketFilterProgram;
-use rawsocket::{self, RawCapture, filter::build_tcp_port_filter};
+use rawsocket::{self, filter::build_tcp_port_filter, RawCapture};
 
 #[tokio::main]
 async fn main() {

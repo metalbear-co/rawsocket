@@ -69,7 +69,10 @@ impl SocketFilterProgram {
     pub fn to_dump(&self) -> String {
         let mut output = format!("len: {}\n", self.len);
         for instruction in self.filter.iter() {
-            output.push_str(&format!("{} {} {} {},", instruction.code, instruction.jt, instruction.jf, instruction.k));
+            output.push_str(&format!(
+                "{} {} {} {},",
+                instruction.code, instruction.jt, instruction.jf, instruction.k
+            ));
         }
         output
     }
@@ -107,30 +110,9 @@ impl From<u8> for Comparison {
     }
 }
 
-/// type of `k` operand
-pub type Value = u32;
-
 const DROP: Instruction = Instruction::new((BPF_RET | BPF_K) as _, 0, 0, 0);
 const RETURN_A: Instruction = Instruction::new((BPF_RET | BPF_A) as _, 0, 0, 0);
 const LOAD_LENGTH: Instruction = Instruction::new((BPF_LD | BPF_LEN | BPF_W) as _, 0, 0, 0);
-
-/// Generates a sequence of instructions that implement the exit logic of a programs.
-///
-/// BPF programs return value is interpreted as an unsigned length to which the packet will be
-/// truncated, where 0 means "drop the packet".
-/// Unlike libpcap, `bs-cbpf` doesn't truncate the packet to an arbitrary size, but instead
-/// fetches the inspected packet total length and returns that value when packets are determined as
-/// valid by the program's logic.
-/// So `bs-cbpf`'s exit sequence has 2 entry points corresponding to the 2 possible outcomes
-/// of the program - let the packet PASS, or DROP the packet.
-///
-/// # Return Value
-/// Return value is a tuple containing a `Vec<Instruction>` representing the exit sequence, an
-/// offset in the sequence pointing to the PASS entry point, and an offset in the sequence pointing
-/// to the DROP entry point.
-pub fn return_sequence() -> (Vec<Instruction>, usize, usize) {
-    (vec![DROP, RETURN_A, LOAD_LENGTH], 0, 2)
-}
 
 /// Generates a sequence of instructions that passes the entire packet.
 pub fn teotology() -> Vec<Instruction> {
@@ -173,24 +155,18 @@ pub fn load_u16_at(offset: u32) -> Vec<Instruction> {
 }
 
 /// Generates a sequence of instructions that loads four octets from a given offset in the packet.
-pub fn load_u32_at(offset: u32) -> Vec<Instruction> {
-    vec![Instruction::new(
-        (BPF_ABS | BPF_LD | BPF_W) as _,
-        0,
-        0,
-        offset,
-    )]
-}
-
+// pub fn load_u32_at(offset: u32) -> Vec<Instruction> {
+//     vec![Instruction::new(
+//         (BPF_ABS | BPF_LD | BPF_W) as _,
+//         0,
+//         0,
+//         offset,
+//     )]
+// }
 
 /// Store register A in M[offset]
 pub fn store_a_in_m_at(offset: u32) -> Vec<Instruction> {
-    vec![Instruction::new(
-        (BPF_ST) as _,
-        0,
-        0,
-        offset,
-    )]
+    vec![Instruction::new((BPF_ST) as _, 0, 0, offset)]
 }
 
 /// Generates a sequence of instructions that loads two octets from a given offset in the packet.
@@ -214,10 +190,5 @@ pub fn load_u16_at_x_offset(offset: u32) -> Vec<Instruction> {
 }
 
 pub fn load_u16_from_m_offset(offset: u32) -> Vec<Instruction> {
-    vec![Instruction::new(
-        (BPF_LD | BPF_MEM) as _,
-        0,
-        0,
-        offset
-    )]
+    vec![Instruction::new((BPF_LD | BPF_MEM) as _, 0, 0, offset)]
 }
