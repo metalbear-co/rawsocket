@@ -96,3 +96,8 @@ pub fn build_tcp_port_filter(ports: &[u16]) -> SocketFilterProgram {
 
     SocketFilterProgram::from_vector(instructions)
 }
+
+pub fn build_drop_always() -> SocketFilterProgram {
+    let instructions = contradiction();
+    SocketFilterProgram::from_vector(instructions)
+}
