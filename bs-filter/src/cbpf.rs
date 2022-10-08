@@ -65,6 +65,14 @@ impl SocketFilterProgram {
         let filter = v.into_boxed_slice();
         Self { len, filter }
     }
+
+    pub fn to_dump(&self) -> String {
+        let mut output = format!("len: {}\n", self.len);
+        for instruction in self.filter.iter() {
+            output.push_str(&format!("{} {} {} {},", instruction.code, instruction.jt, instruction.jf, instruction.k));
+        }
+        output
+    }
 }
 
 /// Different kinds of comparisons to perform upon `BPF_JMP` instructions
@@ -126,7 +134,7 @@ pub fn return_sequence() -> (Vec<Instruction>, usize, usize) {
 
 /// Generates a sequence of instructions that passes the entire packet.
 pub fn teotology() -> Vec<Instruction> {
-    vec![RETURN_A, LOAD_LENGTH]
+    vec![LOAD_LENGTH, RETURN_A]
 }
 
 /// Generates a sequence of instructions that drops the packet.

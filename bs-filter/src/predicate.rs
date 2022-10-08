@@ -46,7 +46,7 @@ pub struct Predicate {
 impl Predicate {
     /// Generate a `Socket`-appropriate `Filter` implementing `self`'s logic
     pub fn compile(mut self) -> Filter {
-        self = Predicate::from_inner(self.into_inner().simplify_via_laws());
+        self = Predicate::from_inner(self.into_inner().simplify_via_bdd());
         let (mut instructions, jt, jf) = cbpf::return_sequence();
 
         instructions.extend(self.walk(jt, jf));
