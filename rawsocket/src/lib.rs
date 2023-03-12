@@ -11,7 +11,7 @@ use libc::sock_fprog;
 use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 use tokio::io::unix::AsyncFd;
 
-const BUFFER_SIZE: usize = 1024 * 5;
+const BUFFER_SIZE: usize = 65535; // Standard max packet size
 const PACKET_IGNORE_OUTGOING: libc::c_int = 23;
 /// Helper macro to execute a system call that returns an `io::Result`.
 /// from socket2
