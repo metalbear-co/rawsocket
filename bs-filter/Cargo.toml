@@ -6,7 +6,7 @@ authors = [
     "Oskar Matzerath <moskar.drummer@gmail.com>",
 ]
 edition = "2021"
-
+license = "MIT"
 
 [dependencies]
 libc = "0.2"
