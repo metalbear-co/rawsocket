@@ -61,7 +61,7 @@ impl RawSocket {
         if len > buffer_size {
             Err(std::io::Error::new(
                 std::io::ErrorKind::OutOfMemory,
-                format!("Buffer too small: required {len} bytes, current {buffer_size} bytes")
+                format!("Buffer too small: required {len} bytes, current {buffer_size} bytes"),
             ))
         } else {
             unsafe {
@@ -80,7 +80,10 @@ pub struct RawCapture {
 impl RawCapture {
     pub fn from_socket(socket: Socket) -> Result<Self, std::io::Error> {
         let inner = AsyncFd::new(RawSocket { inner: socket })?;
-        Ok(Self { inner, buffer_size: DEFAULT_BUFFER_SIZE })
+        Ok(Self {
+            inner,
+            buffer_size: DEFAULT_BUFFER_SIZE,
+        })
     }
 
     pub fn from_interface_index(interface: i32) -> Result<Self, std::io::Error> {
