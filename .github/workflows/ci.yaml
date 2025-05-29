@@ -13,10 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: metalbear-co/setup-rust-toolchain@009cda47e1b529982a00627a40eda87b4215035a
         with:
           toolchain: stable
-          profile: minimal
           components: rustfmt, clippy
       - run: cargo fmt --all -- --check
       - run: cargo clippy -- -D warnings
