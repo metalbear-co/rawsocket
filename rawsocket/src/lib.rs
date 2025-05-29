@@ -11,7 +11,7 @@ use libc::sock_fprog;
 use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 use tokio::io::unix::AsyncFd;
 
-const BUFFER_SIZE: usize = 65535; // Standard max packet size
+const DEFAULT_BUFFER_SIZE: usize = 655350; // Standard max packet size
 const PACKET_IGNORE_OUTGOING: libc::c_int = 23;
 /// Helper macro to execute a system call that returns an `io::Result`.
 /// from socket2
@@ -53,13 +53,16 @@ impl AsRawFd for RawSocket {
 }
 
 impl RawSocket {
-    fn next(&self) -> Result<Packet, std::io::Error> {
-        let mut buf = Vec::with_capacity(BUFFER_SIZE);
+    fn next(&self, buffer_size: usize) -> Result<Packet, std::io::Error> {
+        let mut buf = Vec::with_capacity(buffer_size);
         let len = self
             .inner
             .recv_with_flags(buf.spare_capacity_mut(), libc::MSG_TRUNC)?;
-        if len > BUFFER_SIZE {
-            Err(std::io::Error::from(std::io::ErrorKind::OutOfMemory))
+        if len > buffer_size {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::OutOfMemory,
+                format!("Buffer too small: required {len} bytes, current {buffer_size} bytes")
+            ))
         } else {
             unsafe {
                 buf.set_len(len);
@@ -71,12 +74,13 @@ impl RawSocket {
 
 pub struct RawCapture {
     inner: AsyncFd<RawSocket>,
+    buffer_size: usize,
 }
 
 impl RawCapture {
     pub fn from_socket(socket: Socket) -> Result<Self, std::io::Error> {
         let inner = AsyncFd::new(RawSocket { inner: socket })?;
-        Ok(Self { inner })
+        Ok(Self { inner, buffer_size: DEFAULT_BUFFER_SIZE })
     }
 
     pub fn from_interface_index(interface: i32) -> Result<Self, std::io::Error> {
@@ -100,7 +104,7 @@ impl RawCapture {
     pub async fn next(&self) -> Result<Packet, std::io::Error> {
         loop {
             let mut guard = self.inner.readable().await?;
-            match guard.try_io(|inner| inner.get_ref().next()) {
+            match guard.try_io(|inner| inner.get_ref().next(self.buffer_size)) {
                 Ok(result) => return result,
                 Err(_would_block) => continue,
             }
@@ -131,5 +135,15 @@ impl RawCapture {
             std::mem::size_of::<libc::c_int>() as libc::socklen_t
         ))
         .map(|_| ())
+    }
+
+    /// Sets the buffer size for packet capture
+    pub fn set_buffer_size(&mut self, size: usize) {
+        self.buffer_size = size;
+    }
+
+    /// Gets the current buffer size for packet capture
+    pub fn get_buffer_size(&self) -> usize {
+        self.buffer_size
     }
 }
