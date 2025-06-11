@@ -81,9 +81,9 @@ pub struct RawCapture {
 }
 
 impl RawCapture {
-    /// Lenght of the buffer we use to receive packets.
+    /// Length of the buffer we use to receive packets.
     ///
-    /// Should be enought to handle any Ethernet frame.
+    /// Should be enough to handle any Ethernet frame.
     const BUFFER_SIZE: usize = 655350;
 
     pub fn from_socket(socket: Socket) -> Result<Self, std::io::Error> {
