@@ -13,6 +13,7 @@ socket2 = { version = "0.5", features = ["all"] }
 ipnetwork = "0.20"
 nix = "0.26"
 bs-filter = { path = "../bs-filter" }
+bytes = "1"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["full"] }
