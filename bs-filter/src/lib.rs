@@ -20,7 +20,7 @@ pub fn instructions_to_program(
     instructions: Vec<cbpf::Instruction>,
 ) -> Result<SocketFilterProgram> {
     let len = instructions.len();
-    if len > u16::max_value() as usize {
+    if len > u16::MAX as usize {
         return Err(BsError::FilterProgramOverflow);
     }
     Ok(SocketFilterProgram::from_vector(instructions))

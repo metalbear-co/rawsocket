@@ -154,16 +154,6 @@ pub fn load_u16_at(offset: u32) -> Vec<Instruction> {
     )]
 }
 
-/// Generates a sequence of instructions that loads four octets from a given offset in the packet.
-// pub fn load_u32_at(offset: u32) -> Vec<Instruction> {
-//     vec![Instruction::new(
-//         (BPF_ABS | BPF_LD | BPF_W) as _,
-//         0,
-//         0,
-//         offset,
-//     )]
-// }
-
 /// Store register A in M[offset]
 pub fn store_a_in_m_at(offset: u32) -> Vec<Instruction> {
     vec![Instruction::new((BPF_ST) as _, 0, 0, offset)]
