@@ -61,13 +61,10 @@ impl RawSocket {
 
         if len > buffer.capacity() {
             // This should never really happen.
-            Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!(
-                    "Buffer too small: required {len} bytes, buffer size is {}",
-                    buffer.capacity()
-                ),
-            ))
+            Err(std::io::Error::other(format!(
+                "Buffer too small: required {len} bytes, buffer size is {}",
+                buffer.capacity()
+            )))
         } else {
             unsafe {
                 buffer.set_len(len);
